@@ -4,12 +4,13 @@ This repository accompanies the paper **GeoSemDet: Geometry- and Semantics-Guide
 
 ## Dataset
 
-The Concrete-12 dataset is publicly available on Hugging Face:
+The datasets used by GeoSemDet are publicly available on Hugging Face:
 
 - [YangNexus/Concrete-12](https://huggingface.co/datasets/YangNexus/Concrete-12)
+- [YangNexus/pcb](https://huggingface.co/datasets/YangNexus/pcb)
 
 ## Citation
 
-If you use this repository or the Concrete-12 dataset in your research, please cite our paper:
+If you use this repository or either dataset in your research, please cite our paper:
 
 > **GeoSemDet: Geometry- and Semantics-Guided End-to-End Detection for Visually Confounded Targets**
