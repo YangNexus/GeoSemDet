@@ -1,0 +1,175 @@
+# GeoSemDet -- shared runtime, training recipe and loss configuration.
+#
+# Dataset paths and class counts live in configs/dataset/*.yml.
+# Per-benchmark overrides live in configs/geosemdet_{pcb,concrete12}.yml.
+#
+# Upstream: DEIM (https://github.com/ShihuaHuang95/DEIM) / D-FINE / RT-DETR.
+
+task: detection
+
+evaluator:
+  type: CocoEvaluator
+  iou_types: ['bbox']
+
+remap_mscoco_category: False
+
+# ---------------------------------------------------------------- logging / runtime
+print_freq: 20
+output_dir: ./outputs/geosemdet
+checkpoint_freq: 100
+plot_train_batch_freq: 12
+verbose_type: 'progress'
+
+sync_bn: True
+find_unused_parameters: True
+
+use_amp: True
+scaler:
+  type: GradScaler
+  enabled: True
+
+use_ema: True
+ema:
+  type: ModelEMA
+  decay: 0.9999
+  warmups: 1000
+  start: 0
+
+cache_imgsz: 960
+ram_cache: False
+yolo_metrice: True
+
+# ---------------------------------------------------------------- model
+model: GeoSemDet
+criterion: DEIMCriterion
+postprocessor: PostProcessor
+
+use_focal_loss: True
+eval_spatial_size: [640, 640]
+
+GeoSemDet:
+  yaml_path: configs/arch/geosemdet_n.yaml   # SFP + DSM + SRG gate + GSA/SRG decoder
+  img_dim: 128                               # detector width
+  text_dim: 768                              # frozen TIPS text embedding dim
+  text_adapter_layers: 1
+
+PostProcessor:
+  num_top_queries: 300
+
+# ---------------------------------------------------------------- optimisation
+epoches: 300
+clip_max_norm: 0.1
+
+# One base learning rate for the whole network: the backbone groups inherit it rather
+# than carrying their own, which is what both benchmark runs used.
+optimizer:
+  type: AdamW
+  params:
+    -
+      params: '^(?=.*backbone)(?!.*norm|bn).*$'
+    -
+      params: '^(?=.*backbone)(?=.*norm|bn).*$'
+      weight_decay: 0.
+    -
+      params: '^(?=.*(?:encoder|decoder))(?=.*(?:norm|bn|bias)).*$'
+      weight_decay: 0.
+  lr: 0.0001
+  betas: [0.9, 0.999]
+  weight_decay: 0.0001
+
+lr_scheduler:
+  type: MultiStepLR
+  milestones: [500]
+  gamma: 0.1
+
+lr_warmup_scheduler:
+  type: LinearWarmup
+  warmup_duration: 500
+
+lrsheduler: flatcosine
+lr_gamma: 1.0
+warmup_iter: 2000
+flat_epoch: 78
+no_aug_epoch: 12
+
+# ---------------------------------------------------------------- losses
+# Detection supervision follows DEIM: matchability-aware classification loss,
+# l1 + GIoU box losses, and the D-FINE distribution-refinement losses. On top of those,
+# `loss_srg_text` puts a small auxiliary supervision on the SRG text logits. It is applied
+# to matched positive queries of the final decoder layer only (`srg_text_aux_loss: false`),
+# and its 0.02 weight keeps it an auxiliary term rather than a second objective.
+DEIMCriterion:
+  weight_dict: {loss_mal: 1, loss_bbox: 5, loss_giou: 2, loss_fgl: 0.15, loss_ddf: 1.5, loss_srg_text: 0.02}
+  losses: ['mal', 'boxes', 'local', 'srg_text']
+  srg_text_aux_loss: false
+  alpha: 0.75
+  gamma: 1.5
+  reg_max: 32
+  no_weight_vfl_epoch: 30
+  matcher:
+    type: HungarianMatcher
+    weight_dict: {cost_class: 2, cost_bbox: 5, cost_giou: 2}
+    alpha: 0.25
+    gamma: 2.0
+
+# ---------------------------------------------------------------- data pipeline
+# `npy_folder` holds the offline depth priors: one <image-stem>.npz per image with a
+# single 2-D float32 array under key `arr_0`, at the RGB resolution.
+# See tools/priors/generate_depth_prior.py.
+train_dataloader:
+  type: DataLoader
+  dataset:
+    type: MultimodalCocoDetection
+    return_masks: False
+    npy_size_mismatch: error
+    transforms:
+      type: MultimodalCompose
+      ops:
+        - {type: RandomPhotometricDistort, p: 0.5}
+        - {type: RandomZoomOut, fill: 0}
+        - {type: RandomIoUCrop, p: 0.8}
+        - {type: SanitizeBoundingBoxes, min_size: 1}
+        - {type: RandomHorizontalFlip}
+        - {type: Resize, size: [640, 640]}
+        - {type: SanitizeBoundingBoxes, min_size: 1}
+        - {type: ConvertPILImage, dtype: 'float32', scale: True}
+        - {type: NormalizeNPYMinMax}     # per-image min-max of the depth prior
+        - {type: ConvertBoxes, fmt: 'cxcywh', normalize: True}
+      policy:
+        name: stop_epoch
+        epoch: [4, 78, 288]
+        ops: ['RandomPhotometricDistort', 'RandomZoomOut', 'RandomIoUCrop']
+      mosaic_prob: 0.0
+  collate_fn:
+    type: BatchMultimodalCollateFunction
+    base_size: 640
+    base_size_repeat: 6
+    stop_epoch: 288
+    mixup_prob: 0.0
+    mixup_epochs: [0, 0]
+    ema_restart_decay: 0.9999
+  shuffle: True
+  num_workers: 4
+  drop_last: True
+  pin_memory: True
+  total_batch_size: 4
+
+val_dataloader:
+  type: DataLoader
+  dataset:
+    type: MultimodalCocoDetection
+    return_masks: False
+    npy_size_mismatch: error
+    transforms:
+      type: MultimodalCompose
+      ops:
+        - {type: Resize, size: [640, 640]}
+        - {type: ConvertPILImage, dtype: 'float32', scale: True}
+        - {type: NormalizeNPYMinMax}
+  collate_fn:
+    type: BatchMultimodalCollateFunction
+  shuffle: False
+  num_workers: 4
+  drop_last: False
+  pin_memory: True
+  total_batch_size: 4

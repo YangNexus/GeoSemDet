@@ -1,0 +1,28 @@
+# GeoSemDet on the augmented PKU-Market-PCB benchmark.
+# Reported in the paper: 84.30% AP (single run).
+#
+# The training recipe lives entirely in geosemdet_base.yml and is shared with
+# configs/geosemdet_concrete12.yml; only the data, the class list and the text bank
+# differ between the two benchmarks.
+#
+#   python train.py -c configs/geosemdet_pcb.yml
+
+__include__: [
+  'geosemdet_base.yml',
+  'dataset/pcb.yml',
+]
+
+output_dir: ./outputs/geosemdet_pcb
+
+# Category-text bank for SRG: TIPS embeddings of the per-class descriptions and the two
+# reference/target anchors, encoded once offline (tools/priors/build_text_bank.py).
+text_cache_file: text_embedding/text_bank_pcb.pth
+
+GeoSemDet:
+  expected_categories:
+    - missing_hole
+    - mouse_bite
+    - open_circuit
+    - short
+    - spurious_copper
+    - spur

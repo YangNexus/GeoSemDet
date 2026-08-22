@@ -1,0 +1,30 @@
+# PKU-Market-PCB (Huang et al., 2019), expanded by offline augmentation.
+# 4,625 images / 19,942 instances -> 3,700 train, 462 val, 463 test.
+#
+# Expected layout (see README):
+#   data/pcb/{train,val,test}/images/           RGB
+#   data/pcb/{train,val,test}/annotations/*.json COCO
+#   data/depth_pcb/{train,val,test}/npz/        depth priors (tools/priors/generate_depth_prior.py)
+
+num_classes: 6
+
+train_dataloader:
+  dataset:
+    img_folder: data/pcb/train/images
+    npy_folder: data/depth_pcb/train/npz
+    ann_file: data/pcb/train/annotations/train.json
+
+val_dataloader:
+  dataset:
+    img_folder: data/pcb/val/images
+    npy_folder: data/depth_pcb/val/npz
+    ann_file: data/pcb/val/annotations/val.json
+
+# To evaluate on the held-out test split (the split reported in the paper), point
+# val_dataloader at it instead:
+#
+# val_dataloader:
+#   dataset:
+#     img_folder: data/pcb/test/images
+#     npy_folder: data/depth_pcb/test/npz
+#     ann_file: data/pcb/test/annotations/test.json

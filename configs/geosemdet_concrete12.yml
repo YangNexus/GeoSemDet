@@ -1,0 +1,32 @@
+# GeoSemDet on the Concrete-12 benchmark.
+# Reported in the paper: 42.68 +/- 0.23% AP (mean over three independent runs).
+#
+#   python train.py -c configs/geosemdet_concrete12.yml
+#
+# The training recipe lives entirely in geosemdet_base.yml and is shared with
+# configs/geosemdet_pcb.yml; only the data, the class list and the text bank differ
+# between the two benchmarks.
+
+__include__: [
+  'geosemdet_base.yml',
+  'dataset/concrete12.yml',
+]
+
+output_dir: ./outputs/geosemdet_concrete12
+
+text_cache_file: text_embedding/text_bank_concrete12.pth
+
+GeoSemDet:
+  expected_categories:
+    - Airhole
+    - Crack
+    - Exposed reinforcement
+    - Formwork deformation
+    - Formwork misalignment
+    - Honeycombing
+    - Inclusions
+    - Missing edge
+    - Mortar leakage
+    - Pitting surface
+    - Seepage
+    - Voids

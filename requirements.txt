@@ -1,0 +1,27 @@
+# GeoSemDet -- runtime dependencies.
+# Install PyTorch separately for your CUDA version: https://pytorch.org/get-started/locally/
+# The results in the paper were produced with PyTorch on a single NVIDIA RTX 4090 (24 GB).
+
+# --- core ---
+numpy
+Pillow
+PyYAML
+scipy
+timm==1.0.7
+faster-coco-eval>=1.6.5      # COCO mAP evaluation
+tensorboard                  # training curves (torch.utils.tensorboard)
+
+# --- reporting ---
+matplotlib
+prettytable
+tidecv                       # error-type breakdown in the evaluation log
+calflops                     # parameter / FLOP counting
+
+# --- offline text bank (tools/priors/build_text_bank.py) ---
+sentencepiece==0.2.1         # TIPS tokenizer
+
+# --- optional: qualitative figures (tools/visualization/layercam_concrete12.py) ---
+grad-cam==1.5.4
+
+# --- optional: running the test suite ---
+# pytest
