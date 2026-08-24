@@ -210,12 +210,15 @@ text_embedding/   the cached text banks
 
 ## Citation
 
+The paper has not yet been published. Formal publication details will be added here when available. In the meantime, please reference this repository as:
+
 ```bibtex
-@article{geosemdet,
-  title   = {GeoSemDet: Geometry- and Semantics-Guided End-to-End Detection for
-             Visually Confounded Targets},
-  journal = {Expert Systems with Applications},
-  year    = {2026}
+@misc{geosemdet,
+  author       = {YangNexus},
+  title        = {GeoSemDet: Geometry- and Semantics-Guided End-to-End Detection for
+                  Visually Confounded Targets},
+  howpublished = {GitHub repository},
+  url          = {https://github.com/YangNexus/GeoSemDet}
 }
 ```
 
