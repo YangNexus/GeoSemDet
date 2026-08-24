@@ -55,10 +55,11 @@ Backbone weights: `weight/hgnetv2/PPHGNetV2_B0_stage1_MG.pth` (HGNetv2-B0, from 
 
 ## Data
 
-Both datasets are published on Hugging Face:
+Concrete-12 is publicly available on Hugging Face:
 
 - [YangNexus/Concrete-12](https://huggingface.co/datasets/YangNexus/Concrete-12) -- the twelve-class concrete surface-quality benchmark introduced with this paper
-- [YangNexus/pcb](https://huggingface.co/datasets/YangNexus/pcb) -- an augmented six-class PCB defect-detection benchmark derived from PKU-Market-PCB and organized for the GeoSemDet workflow
+
+The augmented PKU-Market-PCB benchmark is not currently distributed while its provenance and split protocol are under review.
 
 The depth priors are **not** part of either dataset; generate them from the images with
 `tools/priors/generate_depth_prior.py` (see below).
