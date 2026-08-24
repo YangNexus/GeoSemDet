@@ -13,13 +13,6 @@ attention head samples, and which category a query is assigned.
 At capture time the model needs **RGB only**. The depth prior is generated offline from the
 image itself, and the text bank is encoded once and cached.
 
-| Benchmark | AP | vs. DEIM-N |
-|---|---|---|
-| PKU-Market-PCB (augmented) | **84.30** | +6.20 |
-| Concrete-12 (held-out test, 3 runs) | **42.68 ± 0.23** | +5.53 |
-
-7.91 M parameters, 11.11 GFLOPs (DEIM-N: 3.73 M / 7.12 GFLOPs).
-
 ---
 
 ## The four components
