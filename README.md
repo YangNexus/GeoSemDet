@@ -59,8 +59,6 @@ Concrete-12 is publicly available on Hugging Face:
 
 - [YangNexus/Concrete-12](https://huggingface.co/datasets/YangNexus/Concrete-12) -- the twelve-class concrete surface-quality benchmark introduced with this paper
 
-The augmented PKU-Market-PCB benchmark is not currently distributed while its provenance and split protocol are under review.
-
 The depth priors are **not** part of either dataset; generate them from the images with
 `tools/priors/generate_depth_prior.py` (see below).
 
