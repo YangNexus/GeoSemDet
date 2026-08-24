@@ -166,33 +166,6 @@ The configs validate on the **val** split during training. The paper reports the
 test** split; each dataset config carries a commented-out block that points
 `val_dataloader` at it.
 
-## Sanity checks
-
-```bash
-python tools/debug/geosemdet_smoke.py -c configs/geosemdet_pcb.yml --overfit-steps 2
-```
-
-Builds the model, runs two optimizer steps on real data and one eval pass. It reports
-`loss_srg_text` and `srg_stats` (the SRG gate `gamma`, the effective per-query `alpha`), so
-it fails loudly if the text bank or the depth priors are not wired up. A correctly assembled
-model reports **7.91 M** parameters.
-
-`tools/debug/visualize_srg_gate.py` dumps the SRG encoder gate map for one validation batch.
-`tools/visualization/layercam_concrete12.py` reproduces the LayerCAM figure from two of your
-own checkpoints.
-
-The test suite covers the layer graph, the GSA and SRG components, the multimodal data
-path and the released configs:
-
-```bash
-pip install pytest && pytest tests -q
-```
-
-Expect `133 passed, 1 xfailed`. The xfail is deliberate and documented in
-`tests/engine/deim/test_matcher.py`: `no_weight_vfl_epoch` switches the classification
-loss but, in the upstream matcher, never switches the matching cost. The behaviour is left
-exactly as the reported results were produced with.
-
 ## Repository layout
 
 ```
